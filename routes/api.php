@@ -4,7 +4,7 @@ use App\Http\Controllers\CatalogoController;
 use App\Http\Controllers\PagoController;
 use App\Http\Controllers\ArtesanoController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Request;
+use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
