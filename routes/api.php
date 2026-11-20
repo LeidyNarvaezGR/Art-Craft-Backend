@@ -4,6 +4,7 @@ use App\Http\Controllers\CatalogoController;
 use App\Http\Controllers\PagoController;
 use App\Http\Controllers\ArtesanoController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -59,3 +60,42 @@ Route::post('/chatbot/mensaje', [
     \App\Http\Controllers\ChatbotController::class,
     'mensaje'
 ])->middleware('throttle:20,1');
+
+
+Route::post('/productos/remoto', function (Request $request) {
+
+    $token = $request->bearerToken();
+    $tokenEsperado = config('services.artcraft.api_token');
+
+    if (
+        !is_string($token) ||
+        !is_string($tokenEsperado) ||
+        $tokenEsperado === '' ||
+        !hash_equals($tokenEsperado, $token)
+    ) {
+        return response()->json([
+            'mensaje' => 'No autorizado'
+        ], 401);
+    }
+
+    $datos = $request->validate([
+        'nombre' => ['required', 'string', 'max:120'],
+        'categoria' => ['required', 'string', 'max:60'],
+        'precio' => ['required', 'integer', 'min:1'],
+        'descripcion' => ['required', 'string', 'max:1000'],
+        'imagen' => ['required', 'string', 'max:255'],
+        'cloudinary_public_id' => ['required', 'string', 'max:255'],
+        'cloudinary_imagen_url' => ['required', 'url', 'max:255'],
+    ]);
+
+    $producto = \App\Models\Producto::create([
+        ...$datos,
+        'ruta_detalle' => 'mostrar-producto',
+        'destacado' => false,
+    ]);
+
+    return response()->json([
+        'mensaje' => 'Producto registrado correctamente',
+        'producto' => $producto,
+    ], 201);
+});
